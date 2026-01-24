@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 
 
-import getopt, sys
+import getopt
+import sys
 
 full_cmd_arguments = sys.argv
 argument_list = full_cmd_arguments[1:]
