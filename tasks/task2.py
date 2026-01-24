@@ -16,6 +16,10 @@ class Recipe:
     cuisine: str
     time: int
 
+    def __post_init__(self):
+        if not isinstance(self.time, int):
+            raise TypeError("time must be int")
+
 
 @dataclass
 class RecipeCatalog:

@@ -4,54 +4,56 @@
 
 from pathlib import Path
 
+import pytest
 from task2 import Recipe, RecipeCatalog
 
 
-def test_recipe_dataclass():
-    recipe = Recipe("Рамен", "Японская", 40)
-    assert recipe.name == "Рамен"
-    assert recipe.cuisine == "Японская"
-    assert recipe.time == 40
-
-
-def test_catalog_add():
+@pytest.fixture
+def filled_catalog():
     catalog = RecipeCatalog()
-    catalog.add(Recipe("Бургер", "Американская", 15))
-
-    assert len(catalog.recipes) == 1
-    assert catalog.recipes[0].name == "Бургер"
-
-
-def test_catalog_sorting():
-    catalog = RecipeCatalog()
-    catalog.add(Recipe("Суп", "Русская", 45))
-    catalog.add(Recipe("Салат", "Европейская", 10))
-
-    assert catalog.recipes[0].time == 10
+    catalog.add(Recipe("Рамен", "Японская", 40))
+    catalog.add(Recipe("Суши", "Японская", 50))
+    catalog.add(Recipe("Борщ", "Украинская", 60))
+    return catalog
 
 
-def test_catalog_filter():
-    catalog = RecipeCatalog()
-    catalog.add(Recipe("Тако", "Мексиканская", 20))
-    catalog.add(Recipe("Буррито", "Мексиканская", 30))
-    catalog.add(Recipe("Плов", "Узбекская", 90))
+def test_recipe_fields():
+    recipe = Recipe("Тако", "Мексиканская", 20)
+    assert recipe.name == "Тако"
+    assert recipe.cuisine == "Мексиканская"
+    assert recipe.time == 20
 
-    result = catalog.select_by_cuisine("мексиканская")
+
+def test_invalid_time_type():
+    with pytest.raises(TypeError):
+        Recipe("Паста", "Итальянская", None)
+
+
+def test_filter_japanese_recipes(filled_catalog):
+    result = filled_catalog.select_by_cuisine("японская")
     assert len(result) == 2
 
 
-def test_json_persistence(tmp_path: Path):
+def test_sorting_by_time():
+    catalog = RecipeCatalog()
+    catalog.add(Recipe("Долгое", "Тест", 100))
+    catalog.add(Recipe("Быстрое", "Тест", 5))
+
+    assert catalog.recipes[0].time == 5
+
+
+def test_json_roundtrip(tmp_path: Path):
     file = tmp_path / "data.json"
 
     catalog = RecipeCatalog()
     catalog.add(Recipe("Лапша", "Китайская", 25))
     catalog.save(file)
 
-    new_catalog = RecipeCatalog()
-    new_catalog.load(file)
+    loaded = RecipeCatalog()
+    loaded.load(file)
 
-    assert len(new_catalog.recipes) == 1
-    assert new_catalog.recipes[0].cuisine == "Китайская"
+    assert len(loaded.recipes) == 1
+    assert loaded.recipes[0].cuisine == "Китайская"
 
 
 def test_empty_catalog_str():
