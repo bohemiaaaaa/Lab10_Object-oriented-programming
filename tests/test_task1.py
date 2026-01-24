@@ -21,7 +21,7 @@ def test_add_recipe_and_sort():
     catalog.add(Recipe("Паста", "Итальянская", 20))
 
     assert len(catalog.recipes) == 2
-    assert catalog.recipes[0].name == "Паста"  # сортировка по времени
+    assert catalog.recipes[0].name == "Паста"
 
 
 def test_select_by_cuisine():
